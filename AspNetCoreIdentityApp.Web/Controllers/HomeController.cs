@@ -44,17 +44,17 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
-            var identityResult = await _userManager.CreateAsync(new() {UserName=request.UserName, PhoneNumber=request.Phone,Email=request.Email},request.PasswordConfirm);
+            var identityResult = await _userManager.CreateAsync(new() { UserName = request.UserName, PhoneNumber = request.Phone, Email = request.Email }, request.PasswordConfirm);
 
-          
 
-            if(identityResult.Succeeded)
+
+            if (identityResult.Succeeded)
             {
                 TempData["SuccessMessage"] = "Üyelik Kayıt İşlemi Başarıyla Gerçekleşmiştir";
                 return RedirectToAction(nameof(HomeController.SignUp));
             }
 
-            ModelState.AddModelErrorList(identityResult.Errors.Select(x=>x.Description).ToList());
+            ModelState.AddModelErrorList(identityResult.Errors.Select(x => x.Description).ToList());
 
             return View();
         }
@@ -65,26 +65,34 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl=null)
+        public async Task<IActionResult> SignIn(SignInViewModel model, string? returnUrl = null)
         {
-            returnUrl = returnUrl ?? Url.Action("Index","Home");
+            
+            returnUrl = returnUrl ?? Url.Action("Privacy", "Home");
 
             var hasUser = await _userManager.FindByEmailAsync(model.Email);
 
-            if(hasUser ==null)
+            if (hasUser == null)
             {
                 ModelState.AddModelError(string.Empty, "Email veya Şifre Yanlış");
                 return View();
             }
 
-            var signInResult = await _signInManager.PasswordSignInAsync(hasUser,model.Password,model.RememberMe,false);
+            var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password, model.RememberMe, true);
 
-            if(signInResult.Succeeded)
+            if (signInResult.Succeeded)
             {
                 return Redirect(returnUrl);
             }
 
-            ModelState.AddModelErrorList(new List<string>() { "Email veya Şifre Yanlış" });
+            if (signInResult.IsLockedOut)
+            {
+                ModelState.AddModelErrorList(new List<string>() { "Hesap Kitlendi. 3 Dakika Boyunca Giriş Yapamazsınız." });
+                return View();
+            }
+                      
+            ModelState.AddModelErrorList(new List<string>() { $"Email veya Şifre Yanlış.",$"Başarısız Giriş Sayısı = {await _userManager.GetAccessFailedCountAsync(hasUser)}"  });
+
 
             return View();
         }
