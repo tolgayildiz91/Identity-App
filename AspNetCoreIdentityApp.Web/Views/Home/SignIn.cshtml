@@ -10,16 +10,16 @@
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
         </div>
 
-        <form asp-controller="Home" asp-action="SignIn" method="post">
+        <form asp-controller="Home" asp-action="SignIn" asp-route-returnUrl="@Context.Request.Query["returnUrl"]" method="post">
             <div class="mb-3">
                 <label for="Email" class="form-label" asp-for="Email"></label>
-                <input asp-for="Email" class="form-control">
+                <input value="tolga@hotmail.com" asp-for="Email" class="form-control">
                 <span class="text-danger" asp-validation-for="Email"></span>
             </div>
 
             <div class="mb-3">
                 <label for="Password" class="form-label" asp-for="Password"></label>
-                <input asp-for="Password" class="form-control">
+                <input value="Password12*" type="password" asp-for="Password" class="form-control">
                 <span class="text-danger" asp-validation-for="Password"></span>
             </div>
 
