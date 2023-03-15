@@ -1,6 +1,10 @@
 using AspNetCoreIdentityApp.Web.Models;
 using Microsoft.EntityFrameworkCore;
 using AspNetCoreIdentityApp.Web.Extensions;
+using Microsoft.AspNetCore.Identity;
+using AspNetCoreIdentityApp.Web.OptionsModels;
+using Microsoft.Extensions.DependencyInjection;
+using AspNetCoreIdentityApp.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +16,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlCon"));
 });
 
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+options.ValidationInterval = TimeSpan.FromMinutes(30)
+); ;
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddIdentityWithExt();
+builder.Services.AddScoped<IEmailServices, EmailService>();
 
 
 builder.Services.ConfigureApplicationCookie(opt =>
