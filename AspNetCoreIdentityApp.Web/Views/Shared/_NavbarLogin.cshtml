@@ -10,6 +10,7 @@
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="Index">Profil</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="PasswordChange">Şifre Değiştir</a></li>
                 <li><a class="dropdown-item" asp-controller="Member" asp-action="UserEdit">Kullanıcı Güncelle</a></li>
+                <li><a class="dropdown-item" asp-controller="Member" asp-action="Claims">Claims</a></li>
                 @{
                     if (User.HasClaim(x =>x.Type==ClaimTypes.Role && x.Value == "admin"))
                     {
@@ -17,7 +18,7 @@
                     }
                 }
 
-
+               
                 <li><a class="dropdown-item" asp-route-returnurl="/Home/Index" asp-controller="Member" asp-action="logout">Çıkış Yap</a></li>
             </ul>
         </li>
