@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.FileProviders;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace AspNetCoreIdentityApp.Web.Controllers
@@ -154,7 +155,13 @@ namespace AspNetCoreIdentityApp.Web.Controllers
 
             await _userManager.UpdateSecurityStampAsync(currentUser);
             await _signInManager.SignOutAsync();
+            if (request.BirthDate.HasValue)
+            {
+                await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDate.Value.ToString()) });
+
+            }
             await _signInManager.SignInAsync(currentUser,true);
+            
 
             TempData["SuccessMessage"] = "Üye Bilgileri Başarıyla Değiştirilmiştir.";
 
@@ -186,7 +193,7 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Claims()
+        public IActionResult Claims()
         {
             var userClaimList = User.Claims.Select(x => new ClaimViewModel()
             {
@@ -196,6 +203,23 @@ namespace AspNetCoreIdentityApp.Web.Controllers
             }).ToList();
 
             return View(userClaimList);
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "AnkaraPolicy")]
+        public IActionResult AnkaraPage()
+        {
+
+            return View();
+        }
+
+
+        [HttpGet]
+        [Authorize(Policy = "ExchangePolicy")]
+        public IActionResult ExchangePage()
+        {
+
+            return View();
         }
 
     }
