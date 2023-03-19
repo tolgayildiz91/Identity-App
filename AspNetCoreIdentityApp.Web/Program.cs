@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authentication;
 using AspNetCoreIdentityApp.Web.ClaimProvider;
 using AspNetCoreIdentityApp.Web.Requirements;
 using Microsoft.AspNetCore.Authorization;
+using static AspNetCoreIdentityApp.Web.Requirements.ViolenceRequirement;
+using AspNetCoreIdentityApp.Web.Seeds;
+using AspNetCoreIdentityApp.Web.PermissionsRoot;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +35,7 @@ builder.Services.AddIdentityWithExt();
 builder.Services.AddScoped<IEmailServices, EmailService>();
 builder.Services.AddScoped<IClaimsTransformation, UserClaimProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, ExchangeExpireRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ViolenceRequirementHandler>();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AnkaraPolicy", policy =>
@@ -44,6 +48,35 @@ builder.Services.AddAuthorization(options =>
     {
         policy.AddRequirements(new ExchangeExpireRequirement());
         
+    });
+
+
+    options.AddPolicy("ViolencePolicy", policy =>
+    {
+        policy.AddRequirements(new ViolenceRequirement() { ThresholdAge=18});
+
+    });
+
+    options.AddPolicy("OrderPermissionReadOrDelete", policy =>
+    {
+        policy.RequireClaim("Permission", Permissions.Order.Delete);
+        policy.RequireClaim("Permission", Permissions.Order.Read);
+        policy.RequireClaim("Permission", Permissions.Stock.Delete);
+
+    });
+    options.AddPolicy("Permissions.Order.Read", policy =>
+    {
+        policy.RequireClaim("Permission", Permissions.Order.Read);
+    });
+    options.AddPolicy("Permissions.Order.Delete", policy =>
+    {
+        policy.RequireClaim("Permission", Permissions.Order.Delete);
+
+    });
+    options.AddPolicy("Permissions.Stock.Delete", policy =>
+    {
+        policy.RequireClaim("Permission", Permissions.Stock.Delete);
+
     });
 
 });
@@ -65,6 +98,13 @@ builder.Services.ConfigureApplicationCookie(opt =>
 
 
 var app = builder.Build();
+
+using(var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+   await  PermissionSeed.Seed(roleManager);
+
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
