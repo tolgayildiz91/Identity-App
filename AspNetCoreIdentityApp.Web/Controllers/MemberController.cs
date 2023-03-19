@@ -160,7 +160,11 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 await _signInManager.SignInWithClaimsAsync(currentUser, true, new[] { new Claim("birthdate", currentUser.BirthDate.Value.ToString()) });
 
             }
-            await _signInManager.SignInAsync(currentUser,true);
+            else
+            {
+                await _signInManager.SignInAsync(currentUser, true);
+            }
+          
             
 
             TempData["SuccessMessage"] = "Üye Bilgileri Başarıyla Değiştirilmiştir.";
@@ -217,6 +221,14 @@ namespace AspNetCoreIdentityApp.Web.Controllers
         [HttpGet]
         [Authorize(Policy = "ExchangePolicy")]
         public IActionResult ExchangePage()
+        {
+
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "ViolencePolicy")]
+        public IActionResult ViolencePage()
         {
 
             return View();

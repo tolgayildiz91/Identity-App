@@ -171,6 +171,8 @@ namespace AspNetCoreIdentityApp.Web.Controllers
                 return View();
             }
 
+
+
             var signInResult = await _signInManager.PasswordSignInAsync(hasUser, model.Password!, model.RememberMe, true);
 
             if (signInResult.IsLockedOut)
